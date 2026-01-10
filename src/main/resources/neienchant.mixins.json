@@ -1,0 +1,12 @@
+{
+    "required": false,
+    "package": "com.berkan.neienchant.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "VeinMinerMixin"
+    ],
+    "client": ["HandledScreenMixin"],
+    "injectors": {
+        "defaultRequire": 0
+    }
+}
