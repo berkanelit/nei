@@ -14,7 +14,7 @@ public class ModKeybindings {
             "key.neienchant.open_enchantment_menu",
             InputUtil.Type.KEYSYM,
             GLFW.GLFW_KEY_X,
-            "category.neienchant.main"
+            KeyBinding.Category.MISC
     );
 
     public static void register() {

@@ -60,7 +60,11 @@ public class EnchantmentScreenHandler extends ScreenHandler {
     @Override
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
-        // Clean up the temporary inventory without dropping items to prevent duplication
+        // Return item to player inventory
+        ItemStack stack = this.inventory.getStack(0);
+        if (!stack.isEmpty()) {
+            player.giveItemStack(stack);
+        }
         this.inventory.setStack(0, ItemStack.EMPTY);
     }
 

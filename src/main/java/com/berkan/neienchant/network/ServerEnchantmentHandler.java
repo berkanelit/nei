@@ -23,17 +23,9 @@ public class ServerEnchantmentHandler {
         int sourceSlotId = payload.sourceSlotId();
 
         context.server().execute(() -> {
-            // Check permissions: Creative mode or OP level 2+
-            if (!player.getAbilities().creativeMode) {
-                player.sendMessage(Text.literal("§cBu özelliği kullanmak için Creative mod veya OP yetkisine sahip olmalısınız!"), true);
-                return;
-            }
-
             player.openHandledScreen(new SimpleNamedScreenHandlerFactory(
                     (syncId, playerInventory, p) -> {
                         EnchantmentScreenHandler handler = new EnchantmentScreenHandler(syncId, playerInventory, sourceSlotId);
-                        // Do NOT copy or set the stack here if you don't want a "phantom" item in the visual slot.
-                        // Instead, the handler will refer to the item already in the player's inventory.
                         return handler;
                     },
                     Text.literal("NEI Enchantment")
@@ -45,12 +37,6 @@ public class ServerEnchantmentHandler {
         ServerPlayerEntity player = context.player();
 
         context.server().execute(() -> {
-            // Check permissions: Creative mode only
-            if (!player.getAbilities().creativeMode) {
-                player.sendMessage(Text.literal("§cBu özelliği kullanmak için Creative mod veya OP yetkisine sahip olmalısınız!"), true);
-                return;
-            }
-
             if (!(player.currentScreenHandler instanceof EnchantmentScreenHandler handler)) {
                 return;
             }
@@ -68,7 +54,7 @@ public class ServerEnchantmentHandler {
             String enchantmentId = payload.enchantmentId();
             int level = Math.min(10, Math.max(1, payload.level()));
 
-            var enchantmentRegistry = context.server().getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+            var enchantmentRegistry = context.server().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
             
             Identifier id = Identifier.tryParse(enchantmentId);
             if (id == null) {
@@ -113,12 +99,6 @@ public class ServerEnchantmentHandler {
         ServerPlayerEntity player = context.player();
 
         context.server().execute(() -> {
-            // Check permissions: Creative mode only
-            if (!player.getAbilities().creativeMode) {
-                player.sendMessage(Text.literal("§cBu özelliği kullanmak için Creative mod veya OP yetkisine sahip olmalısınız!"), true);
-                return;
-            }
-
             if (!(player.currentScreenHandler instanceof EnchantmentScreenHandler handler)) {
                 return;
             }

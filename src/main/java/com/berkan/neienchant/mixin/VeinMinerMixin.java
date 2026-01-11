@@ -23,16 +23,6 @@ import java.util.Queue;
 import java.util.Set;
 
 import net.minecraft.registry.tag.BlockTags;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
 
 @Mixin(net.minecraft.server.network.ServerPlayerInteractionManager.class)
 public class VeinMinerMixin {

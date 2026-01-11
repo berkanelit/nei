@@ -1,10 +1,10 @@
-# NEI Enchantments (Fabric 1.21.1)
+# NEI Enchantments (Fabric 1.21.x)
 
 ![License](https://img.shields.io/github/license/Berkan/nei)
-![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.1-blue)
+![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.0--1.21.11-blue)
 ![Platform](https://img.shields.io/badge/Platform-Fabric-red)
 
-A lightweight and powerful enchantment utility mod for Minecraft 1.21.1, inspired by the classic **Not Enough Items (NEI)** 'X' key feature. It allows players in Creative mode to quickly enchant items with a modern and intuitive GUI.
+A lightweight and powerful enchantment utility mod for Minecraft 1.21.x (1.21.0 to 1.21.11+), inspired by the classic **Not Enough Items (NEI)** 'X' key feature. It allows players in Creative mode to quickly enchant items with a modern and intuitive GUI.
 
 ---
 
@@ -38,10 +38,17 @@ This mod adds custom enchantments to enhance your gameplay:
 
 ## 🛠️ Installation
 
-1. Make sure you have **[Fabric Loader](https://fabricmc.net/)** installed for **1.21.1**.
+1. Make sure you have **[Fabric Loader](https://fabricmc.net/)** installed for **1.21.x** (supports 1.21.0 through 1.21.11+).
 2. Drop the **Fabric API** jar into your `mods` folder.
 3. Drop the **NEI Enchantments** jar into your `mods` folder.
 4. Launch the game and enjoy!
+
+## 📋 Version Compatibility
+
+- **Minecraft:** 1.21.0 - 1.21.11+ (All 1.21.x versions)
+- **Fabric Loader:** 0.16.0+
+- **Java:** 21+
+- **Fabric API:** Required (any 1.21.x compatible version)
 
 ## 🔒 Permissions
 
