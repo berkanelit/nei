@@ -84,7 +84,7 @@ This mod adds custom enchantments to enhance your gameplay:
 To build the project yourself:
 
 ```bash
-git clone https://github.com/yourusername/nei-enchantments.git
+git clone https://github.com/berkanelit/nei-enchantments.git
 cd nei-enchantments
 gradlew build
 ```
@@ -107,7 +107,7 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ## 👨‍💻 Developer
 
-**Berkan** - [GitHub](https://github.com/yourusername)
+**Berkan** - [GitHub](https://github.com/berkanelit)
 
 ---
 
