@@ -1,6 +1,8 @@
 package com.berkan.neienchant.screen;
 
 import com.berkan.neienchant.NEIEnchantMod;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -27,16 +29,16 @@ public class EnchantmentScreenHandler extends ScreenHandler {
         // Item slot - positioned to match GUI drawing (x=8, y=20 relative to GUI)
         this.addSlot(new EnchantableSlot(inventory, 0, 8, 20));
 
-        // Player inventory (3 rows) - standard position
+        // Player inventory (3 rows) — centered (248px screen: 9*18=162, offset=(248-162)/2=43)
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 140 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 43 + col * 18, 140 + row * 18));
             }
         }
 
         // Player hotbar
         for (int col = 0; col < 9; ++col) {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 198));
+            this.addSlot(new Slot(playerInventory, col, 43 + col * 18, 198));
         }
     }
 
@@ -108,6 +110,17 @@ public class EnchantmentScreenHandler extends ScreenHandler {
         @Override
         public int getMaxItemCount() {
             return 1;
+        }
+        
+        @Override
+        public boolean canInsert(ItemStack stack) {
+            if (stack.isEmpty()) return false;
+            // isEnchantable() returns false for already-enchanted items,
+            // so also check for existing enchantments
+            boolean hasEnchantments = !stack.getOrDefault(
+                DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT
+            ).isEmpty();
+            return stack.isEnchantable() || hasEnchantments;
         }
     }
 }

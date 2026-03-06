@@ -23,9 +23,24 @@ public class ServerEnchantmentHandler {
         int sourceSlotId = payload.sourceSlotId();
 
         context.server().execute(() -> {
+            // Get the item from the source slot
+            ItemStack stack = sourceSlotId >= 0 ? player.getInventory().getStack(sourceSlotId) : ItemStack.EMPTY;
+
+            if (stack.isEmpty()) {
+                player.sendMessage(Text.literal("§cNo item in this slot!"), true);
+                return;
+            }
+
+            // Clear the original slot to prevent item duplication
+            // The item will be returned via onClosed → giveItemStack when the screen closes
+            if (sourceSlotId >= 0) {
+                player.getInventory().setStack(sourceSlotId, ItemStack.EMPTY);
+            }
+
             player.openHandledScreen(new SimpleNamedScreenHandlerFactory(
                     (syncId, playerInventory, p) -> {
                         EnchantmentScreenHandler handler = new EnchantmentScreenHandler(syncId, playerInventory, sourceSlotId);
+                        handler.setEnchantingStack(stack.copy());
                         return handler;
                     },
                     Text.literal("NEI Enchantment")
@@ -43,16 +58,23 @@ public class ServerEnchantmentHandler {
 
             int sourceSlotId = handler.getSourceSlotId();
             boolean isInVisualSlot = !handler.getEnchantingStack().isEmpty();
-            ItemStack stack = isInVisualSlot ? handler.getEnchantingStack() : 
+            ItemStack stack = isInVisualSlot ? handler.getEnchantingStack() :
                 (sourceSlotId >= 0 ? player.getInventory().getStack(sourceSlotId) : ItemStack.EMPTY);
 
             if (stack.isEmpty()) {
-                player.sendMessage(Text.literal("§cSlotta eşya yok!"), true);
+                player.sendMessage(Text.literal("§cNo item in slot!"), true);
                 return;
             }
 
             String enchantmentId = payload.enchantmentId();
-            int level = Math.min(10, Math.max(1, payload.level()));
+
+            // Level validation — max 10 cap
+            int level = payload.level();
+            if (level < 1 || level > 10) {
+                player.sendMessage(Text.literal("§cInvalid level!"), true);
+                NEIEnchantMod.LOGGER.warn("Player {} tried to apply invalid level: {}", player.getName().getString(), level);
+                return;
+            }
 
             var enchantmentRegistry = context.server().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
             
@@ -66,6 +88,31 @@ public class ServerEnchantmentHandler {
             if (enchantmentEntry.isEmpty()) {
                 player.sendMessage(Text.literal("§cEnchantment not found!"), true);
                 return;
+            }
+
+            Enchantment enchantment = enchantmentEntry.get().value();
+            
+            // Cap level at the enchantment's own max level
+            int maxLevel = enchantment.getMaxLevel();
+            if (level > maxLevel) {
+                level = maxLevel;
+            }
+            
+            // Check if the item accepts this enchantment
+            if (!enchantment.isAcceptableItem(stack)) {
+                player.sendMessage(Text.literal("§cThis enchantment cannot be applied to this item!"), true);
+                return;
+            }
+
+            // Conflict check against existing enchantments
+            ItemEnchantmentsComponent existingForConflict = stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+            for (var existingEntry : existingForConflict.getEnchantmentEntries()) {
+                // Skip conflict check when updating the same enchantment
+                if (existingEntry.getKey().equals(enchantmentEntry.get())) continue;
+                if (!Enchantment.canBeCombined(enchantmentEntry.get(), existingEntry.getKey())) {
+                    player.sendMessage(Text.literal("§cThis enchantment conflicts with: §e" + getEnchantmentName(existingEntry.getKey())), true);
+                    return;
+                }
             }
 
             // Get current enchantments and add/update the new one
@@ -109,7 +156,7 @@ public class ServerEnchantmentHandler {
                 (sourceSlotId >= 0 ? player.getInventory().getStack(sourceSlotId) : ItemStack.EMPTY);
 
             if (stack.isEmpty()) {
-                player.sendMessage(Text.literal("§cSlotta eşya yok!"), true);
+                player.sendMessage(Text.literal("§cNo item in slot!"), true);
                 return;
             }
 
@@ -148,6 +195,24 @@ public class ServerEnchantmentHandler {
     }
 
     private static String getEnchantmentName(RegistryEntry<Enchantment> entry) {
+        // Use translation key via registry key — more reliable than getName(entry, 1)
+        if (entry.getKey().isPresent()) {
+            Identifier id = entry.getKey().get().getValue();
+            // minecraft:sharpness → enchantment.minecraft.sharpness
+            String translationKey = "enchantment." + id.getNamespace() + "." + id.getPath();
+            Text translated = Text.translatable(translationKey);
+            String result = translated.getString();
+            // If no translation found (key returned as-is), fallback to getName
+            if (result.equals(translationKey)) {
+                Text name = Enchantment.getName(entry, 1);
+                String fullName = name.getString();
+                if (fullName.endsWith(" I")) {
+                    return fullName.substring(0, fullName.length() - 2);
+                }
+                return fullName;
+            }
+            return result;
+        }
         Text name = Enchantment.getName(entry, 1);
         String fullName = name.getString();
         if (fullName.endsWith(" I")) {

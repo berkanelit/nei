@@ -1,6 +1,5 @@
 package com.berkan.neienchant.client;
 
-import com.berkan.neienchant.NEIEnchantMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;

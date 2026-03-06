@@ -1,13 +1,13 @@
 package com.berkan.neienchant.mixin;
 
 import com.berkan.neienchant.client.ModKeybindings;
+import com.berkan.neienchant.client.screen.EnchantmentMenuScreen;
 import com.berkan.neienchant.network.OpenEnchantmentScreenPayload;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.Nullable;
@@ -35,8 +35,11 @@ public abstract class HandledScreenMixin {
     public abstract ScreenHandler getScreenHandler();
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void onKeyPressed(KeyInput keyInput, CallbackInfoReturnable<Boolean> cir) {
-        // Check if our keybind was pressed - 1.21.11+ uses KeyInput
+    private void onKeyPressed(net.minecraft.client.input.KeyInput keyInput, CallbackInfoReturnable<Boolean> cir) {
+        // Don't open again if the NEI enchantment screen is already open
+        if ((Object) this instanceof EnchantmentMenuScreen) return;
+
+        // Check if our keybind was pressed
         if (ModKeybindings.OPEN_ENCHANT_KEY.matchesKey(keyInput)) {
             Slot targetSlot = focusedSlot;
             
@@ -58,12 +61,21 @@ public abstract class HandledScreenMixin {
                 }
             }
             
-            // Check if we have a slot with an item
+            // Check if we have a slot with an item that belongs to the player inventory
             if (targetSlot != null && !targetSlot.getStack().isEmpty()) {
-                int slotId = targetSlot.id;
-                
+                MinecraftClient client = MinecraftClient.getInstance();
+                if (client.player == null) return;
+
+                // Only accept slots that belong to the player's own inventory
+                // (excludes external inventories such as chests and furnaces)
+                if (targetSlot.inventory != client.player.getInventory()) return;
+
+                // targetSlot.index = real index within the slot's own inventory
+                // targetSlot.id   = sequential number in the screen handler (shifts when external slots exist)
+                int inventoryIndex = targetSlot.getIndex();
+
                 // Send packet to server to open the screen
-                ClientPlayNetworking.send(new OpenEnchantmentScreenPayload(slotId));
+                ClientPlayNetworking.send(new OpenEnchantmentScreenPayload(inventoryIndex));
                 cir.setReturnValue(true);
             }
         }
